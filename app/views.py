@@ -6,7 +6,7 @@ This file creates your application.
 """
 import os
 from app import app
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import render_template, request, redirect, url_for, flash, session, abort,send_from_directory
 from werkzeug.utils import secure_filename
 from .forms import UploadForm
 
@@ -37,7 +37,7 @@ def upload():
     if request.method == 'POST':
         if imgfm.validate_on_submit():
             filename = secure_filename(imgfm.img.data.filename)
-            imgfm.img.data.save('uploads/'+filename)
+            imgfm.img.data.save(app.config['UPLOAD_FOLDER']+'/'+filename)
         # Get file data and save to your uploads folder
 
             flash('File Saved', 'success')
@@ -47,6 +47,15 @@ def upload():
 
     return render_template('upload.html',form=imgfm)
 
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    di = os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER'])
+    return send_from_directory(directory=di, path=filename)
+
+@app.route('/files')
+def files():
+    files = get_upload_image()
+    return render_template('files.html',files=files)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -72,6 +81,17 @@ def logout():
 ###
 # The functions below should be applicable to all Flask apps.
 ###
+
+def get_upload_image():
+    filelist = []
+    rootdir = os.getcwd()
+    print (rootdir)
+    for subdir, dirs, files in os.walk(rootdir + '/uploads'):
+        for f in files:
+             ext = os.path.splitext(f)[-1].lower()
+             if ext =='.png'or ext =='.jpg':
+                filelist.append(f)
+    return filelist
 
 # Flash errors from the form if validation fails
 def flash_errors(form):

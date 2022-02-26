@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<h1 class="page-header">File List</h1>
+
+{% include 'flash_messages.html' %}
+
+{%for i in files%}
+    <img src="{{url_for('get_image',filename=i)}}" alt="{{i}}" />
+{% endfor %}    
+
+{% endblock %}
